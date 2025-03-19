@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload & Xem Ảnh</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📷 Upload & Xem Ảnh</h1>
+
+        <!-- Upload Ảnh -->
+        <div class="box">
+            <h2>📤 Upload Ảnh</h2>
+            <input type="file" id="fileInput">
+            <button onclick="uploadImage()">Upload</button>
+            <p id="uploadResult"></p>
+        </div>
+
+        <!-- Xem Ảnh -->
+        <div class="box">
+            <h2>🔍 Xem Ảnh</h2>
+            <input type="text" id="imageId" placeholder="Nhập ID ảnh">
+            <button onclick="viewImage()">Xem</button>
+        </div>
+
+        <div id="imageContainer"></div>
+    </div>
+
+    <script>
+        function uploadImage() {
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+            if (!file) return alert("Vui lòng chọn file!");
+
+            const formData = new FormData();
+            formData.append("image", file);
+
+            fetch("/upload", { method: "POST", body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("uploadResult").innerHTML = 
+                        `✅ Upload thành công! ID: <strong>${data.id}</strong>`;
+                })
+                .catch(err => console.error("Lỗi:", err));
+        }
+
+        function viewImage() {
+            const id = document.getElementById("imageId").value.trim();
+            if (!id) return alert("Vui lòng nhập ID!");
+
+            fetch(`/image/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.fileUrl) {
+                        document.getElementById("imageContainer").innerHTML = 
+                            `<img src="${data.fileUrl}" alt="Ảnh ${id}" class="preview">`;
+                    } else {
+                        document.getElementById("imageContainer").innerHTML = `<p class="error">❌ Không tìm thấy ảnh!</p>`;
+                    }
+                })
+                .catch(err => console.error("Lỗi:", err));
+        }
+    </script>
+</body>
+</html>
